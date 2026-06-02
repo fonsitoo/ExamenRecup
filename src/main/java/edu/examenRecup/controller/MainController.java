@@ -30,15 +30,17 @@ public class MainController {
     @FXML private TextField edadField;
     @FXML private PasswordField passwordField;
     @FXML private ComboBox<Role> roleComboBox;
-    @FXML private Label adminMesageLabel;
+    @FXML private Label adminMessageLabel;
 
     private User currentUser;
     private UserDAO userDAO = new UserDAO();
+
 
     @FXML public void initialize() {
         roleComboBox.getItems().addAll(Role.values());
     }
     public void initData(User user) {
+
         this.currentUser = user;
         welcomeLabel.setText("Welcome," + user.getNombre() + " (" + user.getRole().name() + ")");
 
@@ -115,7 +117,7 @@ public class MainController {
         edadField.setText(String.valueOf(user.getEdad()));
         passwordField.setText(user.getPassword());
         roleComboBox.setValue(user.getRole());
-        adminMesageLabel.setText("");
+        adminMessageLabel.setText("");
     }
 
     @FXML
@@ -127,7 +129,7 @@ public class MainController {
         edadField.clear();
         passwordField.clear();
         roleComboBox.setValue(null);
-        adminMesageLabel.setText("");
+        adminMessageLabel.setText("");
     }
 
     private boolean validateForm() {
@@ -145,11 +147,11 @@ public class MainController {
     }
 
     private void setAdminMessage(String message, boolean isError) {
-        adminMesageLabel.setText(message);
+        adminMessageLabel.setText(message);
         if(isError) {
-            adminMesageLabel.setStyle("-fx-text-fill: red;");
+            adminMessageLabel.setStyle("-fx-text-fill: red;");
         } else {
-            adminMesageLabel.setStyle("-fx-text-fill: green;");
+            adminMessageLabel.setStyle("-fx-text-fill: green;");
         }
     }
 
@@ -188,13 +190,36 @@ public class MainController {
         }
         if (!validateForm()) return;
 
-        User user = new User(Integer.parseInt(idField.getText()), nombreField.getText().trim(), nicknameField.getText().trim(), emailField.getText().trim(), Integer.parseInt(edadField.getText().trim()), passwordField.getText().trim(), roleComboBox.getValue())
+        User user = new User(Integer.parseInt(idField.getText()), nombreField.getText().trim(), nicknameField.getText().trim(), emailField.getText().trim(), Integer.parseInt(edadField.getText().trim()), passwordField.getText().trim(), roleComboBox.getValue());
         if (UserDAO.updateUser(user)){
             setAdminMessage("User successfully updated.", false);
             loadUserCards();
-            if(currentUser.getId() )
+            if(currentUser.getId() == user.getId()){
+                this.currentUser = user;
+                welcomeLabel.setText("Welcome, " + user.getNombre() + " (" + user.getRole().name() + ")!");
+            }
+        } else {
+            setAdminMessage("User successfully updated.", false);
         }
     }
-
+ @FXML
+    private void handleDelete(ActionEvent event) {
+        if (idField.getText().isBlank()) {
+            setAdminMessage("Please select a user to delete", true);
+            return;
+        }
+        int id = Integer.parseInt(idField.getText().trim());
+        if (id == currentUser.getId()) {
+            setAdminMessage("You cant delete yourself", true);
+            return;
+        }
+        if (userDAO.deleteUser(id)) {
+            setAdminMessage("User successfully deleted.", false);
+            loadUserCards();
+            clearForm();
+        } else {
+            setAdminMessage("Failed to delete user.", true);
+        }
+ }
 
 }

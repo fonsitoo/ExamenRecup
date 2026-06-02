@@ -84,7 +84,7 @@ public class UserDAO {
         }
     }
 
-    public boolean updateUser(User user) {
+    public static boolean updateUser(User user) {
         String sql = "UPDATE usuarios SET nombre = ?, nickname = ?, email = ?, edad = ?, password = ?, role = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
